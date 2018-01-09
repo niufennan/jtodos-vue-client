@@ -6,7 +6,6 @@ import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import ForgetPassword from '@/views/ForgetPassword.vue'
 
-
 export default new Router({
 	mode: 'history',
 	routes: [

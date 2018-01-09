@@ -46,8 +46,7 @@
 </style>
 <template>
 	<div>
-		
-			<div class="calender" v-on:touchmove="calenderTouchMove"  
+		<div class="calender" v-on:touchmove="calenderTouchMove"  
 			v-on:touchstart="calenderTouchStart"  v-on:touchend="calenderTouchEnd">
 				<!--日历-->
 				<div class="month" >{{ date| getMonth }}</div>

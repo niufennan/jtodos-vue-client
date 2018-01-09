@@ -1,4 +1,4 @@
-<style scoped >
+<style scoped>
 	#main{
 		  position: relative;
 		  width: 100%;
@@ -48,7 +48,7 @@
 		border: 2px solid #5e35b1;
 		margin-right: 5px;
 	}
-	.bottom-nav{
+	.bottomNav{
 		position: absolute;
 		bottom: 0px;
 		background: #fff;
@@ -83,26 +83,30 @@
 <template>
 	<div id="main">
 		<img src="../assets/bg.png" class="background">
-		<mu-tabs class="tabtitle" :value="indexTab" lineClass="lineClass"  v-on:change="tabChange">
-		    <mu-tab value="tab1" :class="tab1Class" class="left-tab" title="日记" />
-		    <mu-tab value="tab2" :class="tab2Class" title="日历" />
-		    <mu-tab value="tab3" :class="tab3Class" class="right-tab" title="记录" />
-		</mu-tabs>
+		<div class="head">
+			<mu-tabs class="tabtitle" :value="indexTab" lineClass="lineClass"  v-on:change="tabChange">
+			    <mu-tab value="tab1" :class="tab1Class" class="left-tab" title="点滴" />
+			    <mu-tab value="tab2" :class="tab2Class" title="日历" />
+			    <mu-tab value="tab3" :class="tab3Class" class="right-tab" title="记录" />
+			</mu-tabs>
+		</div>
 		<div id="contentPanel">
 			<transition   name="custom-classes-transition"
 		    enter-active-class="animated bounceInLeft"
 		    leave-active-class="animated fadeOut"
 		    :duration="{ enter: 700, leave: 200 }"
 		    >
-				<component v-bind:is="currentView" v-bind:refresh="refresh">
+				<component v-bind:is="currentView">
 				</component>
 			</transition>
 		</div>
-		<mu-bottom-nav class="bottom-nav"  shift v-on:change="navChange">
-		    <mu-bottom-nav-item value="edit" title="" class="navItemClass" iconClass="iconclass" activeClass="iconclass" icon="edit"/>
-		    <mu-bottom-nav-item value="localsee" title=""  class="navItemClass" style="width:34%" iconClass="iconclass" activeClass="iconclass" icon="local_see"/>
-		    <div class="navItemClass"  >{{ itemnumber}}篇日记</div>
-		</mu-bottom-nav>
+		<div class="foot">
+			<mu-bottom-nav class="bottomNav"  shift v-on:change="navChange">
+			    <mu-bottom-nav-item value="edit" title="" class="navItemClass" iconClass="iconclass" activeClass="iconclass" icon="edit"/>
+			    <mu-bottom-nav-item value="photo" title=""  class="navItemClass" style="width:34%" iconClass="iconclass" activeClass="iconclass" icon="local_see"/>
+			    <div class="navItemClass"  >{{ itemnumber }}篇日记</div>
+			</mu-bottom-nav>
+		</div>
 		<mu-dialog :open="isOpen" title="" bodyClass="editDialogBodyClass" dialogClass="editDialogClass">
 		    <CreateOrShowDiaryItem></CreateOrShowDiaryItem>
 		</mu-dialog>
@@ -126,7 +130,6 @@
 	     	MineComponents
      	},
      	computed: mapState({
-			count: state => state.count,
 			isOpen: state => state.createOrShowChildWindowShow,
 			token: state => state.token,
 			groupId: state=>state.groupId,
@@ -135,8 +138,7 @@
     	data () {
             return {
             	currentView:'DiaryPanelComponents',
-                value2: 0,
-                itemnumber:10,
+                itemnumber:1,
                 indexTab:"tab1",
                	tab1Class:"tab-active",
                	tab2Class:"tab",
@@ -148,11 +150,9 @@
         },
         methods: {
         	refresh:function(event){
-        		console.log(this.token);
         		var data={
     				month:(new Date()).getMonth()+1
     			}
-    			console.log(data.month)
 				this.$http.post("/api/index",data,{headers:{"token":this.token}}).then(res=>{
 					if(res.data.msg!=""){
 						this.$router.push({name:"Login"})
@@ -171,6 +171,8 @@
         	navChange:function(event){
         		if(event=='edit'){
         			this.$store.commit('open')
+        		}else if(event=='photo'){
+
         		}
 			},
 			tabChange:function(event){

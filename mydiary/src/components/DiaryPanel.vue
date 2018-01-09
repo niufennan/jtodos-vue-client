@@ -17,7 +17,7 @@
 </style>
 <template>
 	<div class="itemlist">
-		<div  v-for="(item, index) in indexTodos" >
+		<div  v-for="item in indexTodos" >
 			<mu-sub-header class="day_title">{{ item.month }}</mu-sub-header>
 			<DiaryListComponents v-bind:todos="item.todos"></DiaryListComponents>
 		</div>
