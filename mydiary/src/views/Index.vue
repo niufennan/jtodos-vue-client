@@ -113,10 +113,10 @@
 	</div>
 </template>
 <script>
-	import DiaryPanelComponents from '../components/DiaryPanel.vue'
-	import CalendarComponents from '../components/Calendar.vue'
-	import CreateOrShowDiaryItem from '../components/CreateOrShowDiaryItem.vue'
-	import MineComponents from '../components/Mine.vue'
+	import DiaryPanelComponents from  '@/components/DiaryPanel.vue'
+	import CalendarComponents from '@/components/Calendar.vue'
+	import CreateOrShowDiaryItem from '@/components/CreateOrShowDiaryItem.vue'
+	import MineComponents from '@/components/Mine.vue'
 	import { mapState } from 'vuex'
 
     export default {
@@ -165,11 +165,15 @@
 						this.itemnumber=result.itemnumber;
 					}
 				},res=>{
-
+					//查询服务器失败
+					this.$router.push({name:"Login"})
 				})
         	},
         	navChange:function(event){
         		if(event=='edit'){
+        			//1 定位
+        			
+        			//2 获取天气
         			this.$store.commit('open')
         		}else if(event=='photo'){
 

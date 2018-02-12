@@ -75,11 +75,7 @@
 		props:["todos"],
 		filters: {
 	        getDay(time) {
-
-	        	 var date = new Date(time);
-	        	 console.log(date)
-	        	return  date.getDate();
-	        	//return  formatDate(time,"dd");
+	        	return  formatDate(time,"dd");
 	        },
 	        getWeek(time) {
 	        	return  formatDate(time,"w");

@@ -7,7 +7,7 @@ import Register from '@/views/Register.vue'
 import ForgetPassword from '@/views/ForgetPassword.vue'
 
 export default new Router({
-	mode: 'history',
+	//mode: 'history',
 	routes: [
 		{
 			path: '/',

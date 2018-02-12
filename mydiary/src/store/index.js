@@ -8,6 +8,7 @@ const state = {
 	count: 1,
 	createOrShowChildWindowShow: false,
 	groupId:0,
+	addressValue:"",
 	indexTodos:[
 		{
 			month:0,
@@ -22,7 +23,9 @@ const state = {
 				groupId:0,
 			}]
 		}
-	]
+	],
+	weatherBtn:false,
+	locationBtn:true
 }
 
 export default new Vuex.Store({
@@ -43,6 +46,9 @@ export default new Vuex.Store({
 		},
 		setGroupId(state,groupid){
 			state.groupId=groupid;  
+		},
+		setWeatherIsShow(state,isShow){
+			state.weatherBtn=isShow;
 		}
 	}
 })

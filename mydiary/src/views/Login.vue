@@ -27,6 +27,7 @@
 		<img src="../assets/logo.jpg">
 		</div>
 		<div style="margin-top:10px; text-align:center">
+            {{message}}
 			<mu-content-block>
 				<mu-text-field hintText="请输入邮箱" v-model="username" fullWidth inputClass="text_center"/><br/>
 				<mu-text-field hintText="请输入密码" v-model="password"  type="password" inputClass="text_center" fullWidth /><br/>
@@ -47,26 +48,28 @@
 				username: "",
 				password: "",
 				dialog:false,
+                message:"这是一条信息"
 			}
 		},
     	methods:{
     		login:function (event) {
+                //this.location();
+          console.log(event)
     			if(event){
     				var data={
     					username:this.username,
     					password:this.password
     				}
-            		this.$http.post("/login",data).then(res=>{
-            			var result=res.data;
-            			if(result.msg==""){
-            				this.$store.commit('setToken',result.data);
-            				this.$router.push({name:"Index"})
-            			}else{
-            				this.dialog=true;
-            			}
-           		   	},res=>{
-            		})
-    			
+        		this.$http.post("/login",data).then(res=>{
+        			var result=res.data;
+        			if(result.msg==""){
+        				this.$store.commit('setToken',result.data);
+        				this.$router.push({name:"Index"})
+        			}else{
+        				this.dialog=true;
+        			}
+       		   	},res=>{
+        		})
     			}
     		},
     		toRegister:function(event){
@@ -76,7 +79,44 @@
     		},
     		close:function(event){
     			this.dialog=false;
-    		}
+    		},
+        /*
+        location:function(){
+            //开始获取定位数据
+            this.message="你好"
+            //baidu_location.getCurrentPosition(successCallback, failedCallback);
+            navigator.baidu_location.getCurrentPosition(function(position) {
+               this.message='纬度: '          + position.coords.latitude          + '\n' +
+              '经度: '         + position.coords.longitude         + '\n' +
+              '海拔: '          + position.coords.altitude          + '\n' +
+              '水平精度: '          + position.coords.accuracy          + '\n' +
+              '垂直精度: ' + position.coords.altitudeAccuracy  + '\n' +
+              '方向: '           + position.coords.heading           + '\n' +
+              '速度: '             + position.coords.speed             + '\n' +
+              '时间戳: '         + position.timestamp                + '\n';
+    
+　　　　　　 }, function(error) {
+                    this.message='code: '    + error.code    + '\n' +
+                   'message: ' + error.message + '\n';
+        });
+            this.message="再见"
+        },
+        onSuccess:function(position) {
+               this.message='纬度: '          + position.coords.latitude          + '\n' +
+              '经度: '         + position.coords.longitude         + '\n' +
+              '海拔: '          + position.coords.altitude          + '\n' +
+              '水平精度: '          + position.coords.accuracy          + '\n' +
+              '垂直精度: ' + position.coords.altitudeAccuracy  + '\n' +
+              '方向: '           + position.coords.heading           + '\n' +
+              '速度: '             + position.coords.speed             + '\n' +
+              '时间戳: '         + position.timestamp                + '\n';
+    
+　　　　　　 },
+        onError: function(error) {
+                    this.message='code: '    + error.code    + '\n' +
+                   'message: ' + error.message + '\n';
+        }*/
     	}
+      
     }
 </script>

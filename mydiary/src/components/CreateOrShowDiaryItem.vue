@@ -33,6 +33,22 @@
 	.btn i{
 		margin:3px;
 	}
+	.weatherIcon{
+		width: 30px;
+		height: 30px;
+	}
+	.weatherIconActive{
+		width: 30px;
+		height: 30px;
+		border:solid #00f1dc 1px;
+	}
+	.weatherNumber{
+		width: 10%;float: left;
+	}
+	.weatherSlider{
+		width: 80%;float: left;padding-left: 3px;padding-right: 3px;
+	}
+
 </style>
 <style>
 	.txtClass{
@@ -47,7 +63,7 @@
 			<div>{{date | getMonth}}</div>
 			<div class="day">{{date | getDay}}</div>
 			<div class="weekandtime"><span>{{date | getWeek}}</span><span>{{date | getTime}}</span></div>
-			<div class="weatherandaddress"><span>晴 22度/21度</span><span>{{addressValue}} {{addressCity}} {{addressProvince}}</span></div>
+			<div class="weatherandaddress"><span>{{weatherText}}</span><span>{{addressValue}} {{addressCity}} {{addressProvince}}</span></div>
 		</div>
 		<mu-content-block style="background:#fff;margin-bottom:5px;">
 		 	<mu-text-field fullWidth :underlineShow="false" hintText="日记标题" :value="item"/>
@@ -57,20 +73,86 @@
 		<div class="btn">
 	 	 	<!--工具操作栏-->
 	 	 	<mu-icon value="save" v-on:click="save"/>
-	 	 	<mu-icon value="room" v-on:click="chooseAddress"/><!--包装后改为定位-->
+	 	 	<mu-icon value="room" v-on:click="chooseAddress" v-if="locationBtn"/><!--包装后改为定位-->
+	 	 	<mu-icon value="wb_sunny" v-on:click="chooseWeather" v-if="weatherBtn"/><!--包装后改为定位-->
+	 	 	<mu-icon value="mood" v-on:click="chooseMood"/><!--没办法只能先用弹框了-->
 	 	 	<mu-icon value="photo_camera" v-on:click="close"/>
 	 	 	<mu-icon value="delete" style="float:right"/>
 	 	</div>
 
-		<mu-dialog :open="dialog" title="请选择" >
+		<mu-dialog :open="adddialog" title="请选择" >
 		    <mu-picker :slots="addressSlots" :visible-item-count="5" @change="addressChange" :values="address"/>
 			
 			<mu-flat-button slot="actions" primary @click="addressClose" label="确定"/>
+		</mu-dialog>
+		<mu-dialog :open="weatherdialog" title="请选择">
+			<div style="text-align:center">
+				<img src="../assets/3d_60/0.png" :class="weatherIcon0" @click="chooseWeatherIcon(0)">
+				<img src="../assets/3d_60/7.png" :class="weatherIcon1" @click="chooseWeatherIcon(1)">
+				<img src="../assets/3d_60/9.png" :class="weatherIcon2" @click="chooseWeatherIcon(2)">
+				<img src="../assets/3d_60/13.png" :class="weatherIcon3" @click="chooseWeatherIcon(3)">
+				<img src="../assets/3d_60/24.png" :class="weatherIcon4" @click="chooseWeatherIcon(4)">
+				<img src="../assets/3d_60/30.png" :class="weatherIcon5" @click="chooseWeatherIcon(5)">
+			</div>
+			
+			<div>
+					<div class="weatherNumber">
+		  	 			{{highMin}}
+		  			</div>
+		  			<div class="weatherSlider">
+		  	 			<mu-slider v-model="high" :max="highMax" :min="highMin" :step="1" @change="highSliderChange"/>
+		  	 		</div>
+		  			<div class="weatherNumber">
+		  	 		{{highMax}}
+				  	</div>
+			</div>
+			<div class="clr"></div>
+			<div>
+					<div class="weatherNumber">
+		  	 			{{lowMin}}
+		  			</div>
+		  			<div class="weatherSlider">
+		  	 			<mu-slider v-model="low" :max="lowMax" :min="lowMin" :step="1" @change="lowSliderChange"/>
+		  	 		</div>
+		  			<div class="weatherNumber">
+		  	 			{{lowMax}}
+				  	</div>
+			</div>
+			<div class="clr"></div>
+			<div style="text-align:center">
+				{{weatherText}}
+			</div>
+			<mu-flat-button slot="actions" primary @click="weatherClose" label="确定"/>
+		</mu-dialog>
+		<mu-dialog :open="mooddialog">
+			<div style="text-align:center">
+				<div style="text-align:center;float:left">
+					<mu-icon value="sentiment_very_satisfied" :size="40" v-on:click="moodClose(0)"/>
+					<div style="font-size: 11px;">惊喜</div>
+				</div>
+				<div style="text-align:center;float:left">
+					<mu-icon value="sentiment_satisfied" :size="40" v-on:click="moodClose(1)"/>
+					<div style="font-size: 11px;">开心</div>
+				</div>
+				<div style="text-align:center;float:left">
+					<mu-icon value="sentiment_neutral" :size="40" v-on:click="moodClose(2)"/>
+					<div style="font-size: 11px;">一般</div>
+				</div>
+				<div style="text-align:center;float:left">
+					<mu-icon value="sentiment_dissatisfied" :size="40" v-on:click="moodClose(3)"/>
+					<div style="font-size: 11px;">不好</div>
+				</div>
+				<div style="text-align:center;float:left">
+					<mu-icon value="sentiment_very_dissatisfied" :size="40" v-on:click="moodClose(4)"/>
+					<div style="font-size: 11px;">伤心</div>
+				</div>
+			</div>
 		</mu-dialog>
 	</div>
 </template>
 <script>
 	import { formatDate } from '../utils/date.js';
+	import { mapState } from 'vuex';
 	const address = {
   '北京': ['北京'],
   '广东': ['广州', '深圳', '珠海', '汕头', '韶关', '佛山', '江门', '湛江', '茂名', '肇庆', '惠州', '梅州', '汕尾', '河源', '阳江', '清远', '东莞', '中山', '潮州', '揭阳', '云浮'],
@@ -111,9 +193,24 @@
 
 
 	export default {
+		computed: mapState({
+			addressValue:state=>state.addressValue,
+			token: state => state.token,
+			groupId: state=>state.groupId,
+			weatherBtn:state=>state.weatherBtn,
+			locationBtn:state=>state.locationBtn
+		}),
 		data () {
 			return {
- 				dialog: false,
+ 				adddialog: false,
+ 				weatherdialog:false,
+ 				mooddialog:false,
+ 				low:9,
+ 				lowMin:-10,
+ 				lowMax:34,
+ 				high:10,
+ 				highMin:-9,
+ 				highMax:35,
 				rows: 10,
 				underlineShow: false,
 				date:(new Date()).getTime(),
@@ -133,7 +230,17 @@
 				address: ['北京', '北京'],
 				addressProvince: '北京',
 				addressCity: '北京',
-				addressValue:""
+				weatherIcon0:"weatherIconActive",
+				weatherIcon1:"weatherIcon",
+				weatherIcon2:"weatherIcon",
+				weatherIcon3:"weatherIcon",
+				weatherIcon4:"weatherIcon",
+				weatherIcon5:"weatherIcon",
+				weatherText:"晴 10度/9度",
+				weatherIconText:["晴","多云","阴","雨","雪","霾"],
+				weatherIconIndex:0,
+				weatherContent:"",
+				mood:0
 			}
 		},
 		methods: {
@@ -143,20 +250,31 @@
 			},
 			save: function(event){
 				var data={
+					token:this.token,
+					groupId:this.groupId,
 					item:this.item,
-					conent:this.conent
+					conent:this.conent,
+					weather:this.weatherIconIndex,
+					weatherContent:this.weatherContent,
+					mood:this.mood,
+					bookmark:0,
+					address:this.addressValue+" "+this.addressCity+" "+this.addressProvince,
+					lng:0,
+					lat:0,
+					
 				}
-
-
 				this.$store.commit('close')
 			},
 			chooseAddress:function(event){
-				this.dialog=true;
+				this.adddialog=true;
 			},
 			addressClose:function(event){
-				this.dialog=false;
+				this.adddialog=false;
+				//查询此地的天气 省市组合
+				this.searchWeather( this.addressProvince+""+this.addressCity);
 			},
 			addressChange (value, index) {
+				console.log(value+" "+index)
 				switch (index) {
 				case 0:
 				this.addressProvince = value
@@ -169,6 +287,71 @@
 					break
 				}
 				this.address = [this.addressProvince, this.addressCity]
+		    },
+		    chooseWeather:function(event){
+		    	this.setWeatherText();
+		    	this.weatherdialog=true
+		    },
+		    weatherClose:function(event){
+		    	this.weatherdialog=false
+		    	
+		    },
+		    chooseWeatherIcon:function(index){
+		    	this.weatherIconIndex=index;
+		    	for(var i=0;i<6;i++){
+					this["weatherIcon"+i]="weatherIcon";
+				}
+		    	this["weatherIcon"+this.weatherIconIndex]="weatherIconActive";
+		    	this.setWeatherText();
+		    },
+		    highSliderChange:function(event){
+		    	//最低气温不能高过此值
+		    	if(this.low>=this.high){
+		    		this.low=this.high-1;
+		    	}
+		    	this.setWeatherText();
+		    },
+		    lowSliderChange:function(event){
+		    	//最高气温不能低过此值
+		    	if(this.low>=this.high){
+		    		this.high=this.low+1;
+		    	}
+		    	this.setWeatherText();
+		    },
+		    setWeatherText:function(){
+		    	this.weatherText= this.weatherIconText[(this.weatherIconIndex)]+" "+this.high+"度/"+this.low+"度";
+		    	
+		    },
+		    chooseMood:function(){
+				this.mooddialog=true;
+		    },
+		    moodClose:function(mood){
+		    	this.mood=mood
+		    	this.mooddialog=false;
+		    },
+		    searchWeather:function(address){
+		    	var data={
+		    		address:address
+		    	};
+		    	this.$http.post("/api/weather",data,{headers:{"token":this.token}}).then(res=>{
+					if(res.data.msg!=""){
+						//使用手动天气设置
+						this.$store.commit('setWeatherIsShow',true);
+					}
+					console.log(res)
+					var result=res.data.data;
+					console.log(result);
+					if(!(result== undefined ||result=="")){
+						//关闭手动设置按钮
+						this.$store.commit('setWeatherIsShow',false);
+						this.weatherContent=result;
+						this.weatherText= result.text_day+" "+result.temp_high+"度/"+result.temp_low+"度";
+					}
+
+				},res=>{
+					//查询服务器失败,同样显示天气设定界面
+					this.$store.commit('setWeatherIsShow',true);
+				})
 		    }
 		},
 		filters: {

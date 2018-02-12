@@ -15,7 +15,7 @@ export default {
 }
 </script>
 <style  >
- @import '../static/css/animate.css';
+ @import './static/css/animate.css';
  </style>
 <style>
 #app {
