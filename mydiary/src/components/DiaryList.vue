@@ -1,9 +1,14 @@
 <style scoped>
+	.diarypanel{
+		overflow-y: scroll;
+		max-height: calc(100vh - 200px);
+	}
 	.diaryitem{
 		background: #fff;
 		opacity: 1;
 		margin-bottom: 15px;
 		text-align: left;
+		
 	}
 	.item_day{
 		font-size: 36px; 
@@ -40,10 +45,12 @@
 		font-family: 'Microsoft YaHei',arial,tahoma,\5b8b\4f53,sans-serif;
 		
 	}
-	
+	.weatherIconImg{
+		width:16px;height:16px; -webkit-filter: grayscale(100%);filter: grayscale(100%);
+	}
 </style>
 <template>
-	<div>
+	<div class="diarypanel">
 		<mu-paper class="diaryitem" :zDepth="2" v-for="(item) in todos" >
 			<mu-content-block>
 			    <mu-row gutter>
@@ -57,8 +64,8 @@
 						<div class="item_content">{{item.content}}</div>
 					</mu-col>
 					<mu-col width="25" style="text-align:right">
+						<img :src="  item.weather | getWeatherValue   " class="weatherIconImg">
 						<mu-icon :value=" item.mood | getMoodValue  " :size="16"/>
-						<mu-icon :value=" item.weather | getWeatherValue  " :size="16"/>
 						<mu-icon :value=" item.bookmark | getBookmarkValue  " :size="16"/>
 					</mu-col>
 			    </mu-row>
@@ -72,6 +79,7 @@
 	import { weather } from '../utils/weather.js';
 	import { bookmark } from '../utils/bookmark.js';
     export default {
+    	
 		props:["todos"],
 		filters: {
 	        getDay(time) {
@@ -92,6 +100,8 @@
 			getBookmarkValue(num){
 	        	return bookmark(num);
 	        }
-	    }
-    }
+	    },
+
+  	}
+    
 </script>

@@ -6,7 +6,7 @@
 		  background: #fff;
 	}
 	.background{
-	  width: 100%;height: 100%;position: absolute;top: 0px;left: 0px;opacity: 0.5;overflow: hidden;z-index: 0;
+	  width: 100%;height: 100%;position: fixed;top: 0px;left: 0px;opacity: 0.5;overflow: hidden;z-index: 0;
 	}
 	
 	.tabtitle{
@@ -54,9 +54,27 @@
 		background: #fff;
 		color: #757575;
 	}
-	
+	.head{
+		position: fixed;
+		top: 0;right: 0;
+		width: 100%;
+		z-index: 10;
+	}
+	.foot{
+		z-index: 10;
+		position: fixed;
+		bottom: 0;
+		right: 0;
+		width: 100%;
+	}
 	.navItemClass{
 		width:33%;
+	}
+	#contentPanel{
+		overflow-y: scroll;
+		margin-bottom: 0px;
+		margin-top: 60px;
+		height: calc(100vh - 130px);
 	}
 </style>
 <style>
@@ -94,8 +112,7 @@
 			<transition   name="custom-classes-transition"
 		    enter-active-class="animated bounceInLeft"
 		    leave-active-class="animated fadeOut"
-		    :duration="{ enter: 700, leave: 200 }"
-		    >
+		    :duration="{ enter: 700, leave: 200 }">
 				<component v-bind:is="currentView">
 				</component>
 			</transition>
@@ -133,7 +150,7 @@
 			isOpen: state => state.createOrShowChildWindowShow,
 			token: state => state.token,
 			groupId: state=>state.groupId,
-			items:state=>state.indexTodos
+			items: state=>state.indexTodos
 		}),
     	data () {
             return {
@@ -143,32 +160,51 @@
                	tab1Class:"tab-active",
                	tab2Class:"tab",
                	tab3Class:"tab",
+               	allCount:0,
             }
         },
         created(){
-			this.refresh()
+        	var month=(new Date()).getMonth();
+    		var year=(new Date()).getFullYear();
+			this.refresh({month:month,year:year})
         },
         methods: {
-        	refresh:function(event){
-        		var data={
-    				month:(new Date()).getMonth()+1
-    			}
-				this.$http.post("/api/index",data,{headers:{"token":this.token}}).then(res=>{
+
+        	setIndexData:function(data){
+        		this.$http.post("/api/index",data,{headers:{"token":this.token}}).then(res=>{
 					if(res.data.msg!=""){
 						this.$router.push({name:"Login"})
 					}
-
 					var result=res.data.data;
 					if(!(result== undefined ||result=="")){
-						this.$store.commit('setIndexData',result.items);
 						this.$store.commit('setGroupId',result.items[0].todos[0].groupId);
+						this.$store.commit('addIndexData',result.items[0]);
 						this.itemnumber=result.itemnumber;
+						this.allCount+=result.items[0].todos.length;
+						if(this.allCount<10){
+							this.refresh(this.getBeforeMonth(data.year,data.month))
+						}
 					}
 				},res=>{
 					//查询服务器失败
 					this.$router.push({name:"Login"})
 				})
         	},
+        	refresh:function(data){
+        		this.setIndexData(data);
+        	},
+
+        	getBeforeMonth(year,month){
+        		if(month>0){
+        			return {year:year,month:--month}
+        		}else{
+        			return{
+        				year:--year,
+        				month:11
+        			}
+        		}
+        	},
+
         	navChange:function(event){
         		if(event=='edit'){
         			//1 定位

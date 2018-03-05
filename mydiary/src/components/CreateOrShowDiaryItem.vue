@@ -48,7 +48,6 @@
 	.weatherSlider{
 		width: 80%;float: left;padding-left: 3px;padding-right: 3px;
 	}
-
 </style>
 <style>
 	.txtClass{
@@ -66,9 +65,9 @@
 			<div class="weatherandaddress"><span>{{weatherText}}</span><span>{{addressValue}} {{addressCity}} {{addressProvince}}</span></div>
 		</div>
 		<mu-content-block style="background:#fff;margin-bottom:5px;">
-		 	<mu-text-field fullWidth :underlineShow="false" hintText="日记标题" :value="item"/>
+		 	<mu-text-field fullWidth :underlineShow="false" hintText="日记标题" v-model="item"/>
 		 	<mu-divider/>
-		 	<mu-text-field multiLine fullWidth :underlineShow="false" hintText="日记内容" :value="conent" :rows="10"/>
+		 	<mu-text-field multiLine fullWidth :underlineShow="false" hintText="日记内容" v-model="conent" :rows="10"/>
 		</mu-content-block>
 		<div class="btn">
 	 	 	<!--工具操作栏-->
@@ -87,12 +86,12 @@
 		</mu-dialog>
 		<mu-dialog :open="weatherdialog" title="请选择">
 			<div style="text-align:center">
-				<img src="../assets/3d_60/0.png" :class="weatherIcon0" @click="chooseWeatherIcon(0)">
-				<img src="../assets/3d_60/7.png" :class="weatherIcon1" @click="chooseWeatherIcon(1)">
-				<img src="../assets/3d_60/9.png" :class="weatherIcon2" @click="chooseWeatherIcon(2)">
-				<img src="../assets/3d_60/13.png" :class="weatherIcon3" @click="chooseWeatherIcon(3)">
-				<img src="../assets/3d_60/24.png" :class="weatherIcon4" @click="chooseWeatherIcon(4)">
-				<img src="../assets/3d_60/30.png" :class="weatherIcon5" @click="chooseWeatherIcon(5)">
+				<img :src=" 0 | getWeatherValue " :class="weatherIcon0" @click="chooseWeatherIcon(0,0)">
+				<img :src=" 7 | getWeatherValue " :class="weatherIcon1" @click="chooseWeatherIcon(1,7)">
+				<img :src=" 9 | getWeatherValue " :class="weatherIcon2" @click="chooseWeatherIcon(2,9)">
+				<img :src=" 13 | getWeatherValue " :class="weatherIcon3" @click="chooseWeatherIcon(3,13)">
+				<img :src=" 24 | getWeatherValue " :class="weatherIcon4" @click="chooseWeatherIcon(4,24)">
+				<img :src=" 30 | getWeatherValue " :class="weatherIcon5" @click="chooseWeatherIcon(5,30)">
 			</div>
 			
 			<div>
@@ -152,6 +151,7 @@
 </template>
 <script>
 	import { formatDate } from '../utils/date.js';
+	import { weather } from '../utils/weather.js';
 	import { mapState } from 'vuex';
 	const address = {
   '北京': ['北京'],
@@ -230,6 +230,7 @@
 				address: ['北京', '北京'],
 				addressProvince: '北京',
 				addressCity: '北京',
+				weather:0,
 				weatherIcon0:"weatherIconActive",
 				weatherIcon1:"weatherIcon",
 				weatherIcon2:"weatherIcon",
@@ -254,16 +255,26 @@
 					groupId:this.groupId,
 					item:this.item,
 					conent:this.conent,
-					weather:this.weatherIconIndex,
+					weather:this.weather,
 					weatherContent:this.weatherContent,
 					mood:this.mood,
 					bookmark:0,
 					address:this.addressValue+" "+this.addressCity+" "+this.addressProvince,
 					lng:0,
 					lat:0,
-					
 				}
-				this.$store.commit('close')
+				
+				this.$http.post("/api/saveTodos",data,{headers:{"token":this.token}}).then(res=>{
+					if(res.data.msg!=""){
+						//服务端错误 暂时使用最low的方法提示
+						alert(res.data.msg)
+					}
+					//添加成功
+					this.$store.commit('close')
+				},res=>{
+					//查询服务器错误 同样使用最low的方法提示
+					alert(res.data.msg)
+				})
 			},
 			chooseAddress:function(event){
 				this.adddialog=true;
@@ -274,7 +285,6 @@
 				this.searchWeather( this.addressProvince+""+this.addressCity);
 			},
 			addressChange (value, index) {
-				console.log(value+" "+index)
 				switch (index) {
 				case 0:
 				this.addressProvince = value
@@ -296,8 +306,9 @@
 		    	this.weatherdialog=false
 		    	
 		    },
-		    chooseWeatherIcon:function(index){
+		    chooseWeatherIcon:function(index,weatherIcon){
 		    	this.weatherIconIndex=index;
+		    	this.weather=weatherIcon;
 		    	for(var i=0;i<6;i++){
 					this["weatherIcon"+i]="weatherIcon";
 				}
@@ -338,12 +349,11 @@
 						//使用手动天气设置
 						this.$store.commit('setWeatherIsShow',true);
 					}
-					console.log(res)
 					var result=res.data.data;
-					console.log(result);
 					if(!(result== undefined ||result=="")){
 						//关闭手动设置按钮
 						this.$store.commit('setWeatherIsShow',false);
+						this.weather=result.code_day;
 						this.weatherContent=result;
 						this.weatherText= result.text_day+" "+result.temp_high+"度/"+result.temp_low+"度";
 					}
